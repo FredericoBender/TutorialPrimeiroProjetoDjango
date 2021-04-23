@@ -1,5 +1,5 @@
 # TutorialPrimeiroProjetoDjango
-Neste tutorial ensino tudo que você precisa para instalar e implementar seu primeiro Website com Framework Django.
+Neste tutorial mostro tudo que você precisa instalar para começar a implementar seu primeiro Website com o Framework Django, assim como um passo a passo de como implementar sua 1ª aplicação Web neste Framework back-end.
 
 Link para vídeo explicativo: https://youtu.be/I6scI1SWQQw
 
