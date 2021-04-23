@@ -1,0 +1,103 @@
+<!doctype html />
+    <html lang="pt-br">
+        <head>
+            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> <!--Import do necessario para grafico-->
+            <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+            <style type="text/css">
+                body {background: linear-gradient(180deg,#04c2fe,#c679eb,#ff025f)}
+                output, p {font-size: 300%;color: white;text-shadow: 2px 2px 7px black}
+                input {border-radius: 30px; width: 200px ;height: 40px; text-align: center; font-size: 30px;outline: none;}
+                input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {   -webkit-appearance: none;   margin: 0; }
+                input:hover, select:hover{transform: scale(1.1);transition-duration: 1s;}
+                select{margin-left: 10px;outline: none;}
+                svg{border-radius: 20px;}
+                #moedas {border-radius: 30px; height: 40px; margin-bottom: 220px}
+                #selecao_de_moeda {position: relative; text-align: center; margin-top: 5%;width: 20%; height: 20%;}
+                #dados{display: flex; align-items: center; justify-content: center; height: 10%;}
+                #vale {padding-left: 40px;padding-right: 40px;}
+                #grafico {width: 900px;margin: auto}
+                #container { height: 80%; display: flex; flex-direction: row;vertical-align: middle;}
+            </style>
+            <script>
+                function get_cotacao(){
+                    var url = "https://economia.awesomeapi.com.br/json/all/" + moedas.value;
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.open("GET", url, false);
+                    xhttp.send();//A execução do script pára aqui até a requisição retornar do servidor
+
+                    texto = JSON.parse(xhttp.responseText);
+                    valor = parseFloat(texto[moedas.value]["bid"],10).toFixed(2);
+                    return valor}
+
+                function get_data(){
+                    var url = "https://economia.awesomeapi.com.br/json/all/" + moedas.value;
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.open("GET", url, false);
+                    xhttp.send();
+
+                    texto = JSON.parse(xhttp.responseText);
+                    valor = new Date(texto[moedas.value]["timestamp"] *1000);
+                    return valor}
+
+                function alterarCotacao(){
+                    valor = get_cotacao();
+                    document.getElementById("resultado").innerHTML = "R$" + valor;}
+
+                function desenhar_grafico(){
+                    var graf= {
+                        x: [],
+                        y: [],
+                        mode: 'lines+markers',
+                        type:'category',
+                    }
+                    
+                    var url2 = "https://economia.awesomeapi.com.br/json/daily/" + moedas.value +"/360";
+                    var xhttp2 = new XMLHttpRequest();
+                    xhttp2.open("GET", url2, false);
+                    xhttp2.send(); //A execução do script para aqui até a requisição retornar do servidor
+                    texto2 = JSON.parse(xhttp2.responseText);
+
+                    graf.x.push(get_data()); //Adiciona a data da última cotacao
+                    graf.y.push(get_cotacao()); //Adiciona a última cotacao
+                    for (i=1; i<360; i=i+1){
+                        graf.x.push(new Date(texto2[i]["timestamp"] * 1000));
+                        graf.y.push(texto2[i]["bid"]);
+                    }            
+                                    
+                    var data = [graf];
+                    Plotly.newPlot('grafico', data);}
+            </script>
+        </head> 
+
+        <body onload="alterarCotacao();desenhar_grafico();">
+            <div id="container">
+                <div id="selecao_de_moeda">
+                    <label for="moedas" style="font-size: 25px;">Escolha uma moeda:</label>
+                        <select id="moedas" name="moedas" onchange="alterarCotacao(); desenhar_grafico(); valor_a_converter.value='1.00';">
+                            <option value="USD" >USD - (Dólar Comercial)</option>
+                            <option value="USDT" >USDT - (Dólar Turismo)</option>
+                            <option value="CAD">CAD - (Dólar Canadense)</option>
+                            <option value="AUD">AUD - (Dólar Australiano)</option>
+                            <option value="EUR">EUR - (Euro)</option>
+                            <option value="GBP">GBP - (Libra Esterlina)</option>->
+                            <option value="ARS">ARS - (Peso Argentino)</option>
+                            <option value="JPY">JPY - (Iene Japonês)</option>
+                            <option value="CHF">CHF - (Franco Suíço)</option>
+                            <option value="CNY">CNY - (Yuan Chinês)</option>
+                            <option value="ILS">ILS - (Novo Shekel Israelense)</option>
+                            <option value="BTC">BTC - (Bitcoin)</option>
+                            <option value="LTC">LTC - (Litecoin)</option>
+                            <option value="ETH">ETH - (Ethereum)</option>
+                            <option value="XRP">XRP - (Ripple)</option>
+                        </select> 
+                </div>
+                <div id="grafico"></div>
+            </div>
+
+            <div id="dados">
+                <input id="valor_a_converter" type="number" name="valor_a_converter" value="1.00" oninput="resultado.value = 'R$' + parseFloat(valor_a_converter.value*get_cotacao()).toFixed(2)">
+                <p id="vale">VALE</p>
+                <output id="resultado" name="resultado"></output>
+            </div>
+        </body>
+    </html>
